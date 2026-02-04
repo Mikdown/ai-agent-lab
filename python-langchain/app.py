@@ -3,8 +3,9 @@ from datetime import datetime
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
-from langchain.agents import create_agent
 from langchain_core.tools import Tool
+from langchain_core.prompts import ChatPromptTemplate
+import json
 
 def calculator(expression: str) -> str:
     """
@@ -67,18 +68,50 @@ def main():
         )
     ]
     
-    # Create an agent with the tools
-    agent_executor = create_agent(llm, tools, debug=True)
+    # Bind tools to the LLM for tool calling
+    llm_with_tools = llm.bind_tools(tools)
+    
+    # Create a prompt template for the agent
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "You are a helpful AI assistant. You have access to a Calculator tool. "
+                   "When you need to perform calculations, use the Calculator tool by calling it with the mathematical expression. "
+                   "Always use the tool for math questions rather than trying to calculate yourself."),
+        ("human", "{input}")
+    ])
+    
+    # Create the agent chain
+    agent_chain = prompt | llm_with_tools
     
     # Test the agent with a query
     test_query = "What is 25 * 4 + 10?"
     
     try:
         print(f"📝 Query: {test_query}\n")
-        result = agent_executor.invoke({"input": test_query})
-        print(f"\n✅ Result: {result['output']}\n")
+        
+        # Invoke the agent
+        response = agent_chain.invoke({"input": test_query})
+        
+        # Check if the response contains tool calls
+        if hasattr(response, 'tool_calls') and response.tool_calls:
+            print(f"Agent is calling tools...")
+            for tool_call in response.tool_calls:
+                tool_name = tool_call.get("name")
+                tool_input = tool_call.get("args", {})
+                print(f"  📌 Tool: {tool_name}")
+                print(f"  📌 Input: {tool_input}")
+                
+                # Execute the tool
+                if tool_name == "Calculator":
+                    result = calculator(tool_input.get("expression", ""))
+                    print(f"  📌 Result: {result}")
+        else:
+            print(f"Response content: {response.content if hasattr(response, 'content') else response}")
+        
+        print(f"\n✅ Agent completed successfully\n")
     except Exception as e:
         print(f"❌ Error: {str(e)}\n")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()
