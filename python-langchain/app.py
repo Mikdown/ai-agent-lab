@@ -28,6 +28,21 @@ def calculator(expression: str) -> str:
     except Exception as e:
         return f"Error evaluating expression: {str(e)}"
 
+def get_current_time(input: str) -> str:
+    """
+    Returns the current date and time in the format YYYY-MM-DD HH:MM:SS.
+    
+    This tool is useful for when the user asks for the current time or date.
+    It provides the precise current date and time when called.
+    
+    Args:
+        input: A string input parameter (required by Tool interface)
+    
+    Returns:
+        The current date and time formatted as YYYY-MM-DD HH:MM:SS
+    """
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 def main():
     """Main function to start the application."""
     print("🤖 Python LangChain Agent Starting...")
@@ -56,7 +71,7 @@ def main():
         api_key=github_token
     )
     
-    # Create tools list with Calculator tool
+    # Create tools list with Calculator and Time tools
     tools = [
         Tool(
             name="Calculator",
@@ -65,6 +80,13 @@ def main():
                        "Use this tool when you need to compute arithmetic operations such as addition, subtraction, "
                        "multiplication, division, and more complex mathematical expressions. "
                        "Input should be a valid mathematical expression as a string (e.g., '25 * 4 + 10')."
+        ),
+        Tool(
+            name="get_current_time",
+            func=get_current_time,
+            description="Returns the current date and time. Use this tool when the user asks what time it is, "
+                       "what the current date is, or any question about the present moment. "
+                       "The input parameter is not used but is required by the tool interface."
         )
     ]
     
@@ -83,7 +105,7 @@ def main():
     agent_chain = prompt | llm_with_tools
     
     # Test the agent with a query
-    test_query = "What is 25 * 4 + 10?"
+    test_query = "What time is it right now?"
     
     try:
         print(f"📝 Query: {test_query}\n")
