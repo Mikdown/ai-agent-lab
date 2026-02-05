@@ -43,6 +43,22 @@ def get_current_time(input: str) -> str:
     """
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+def reverse_string(input: str) -> str:
+    """
+    Reverses a string by returning it in reverse order.
+    
+    This function takes a string and returns it backwards using Python's
+    slice notation [::-1], which is a concise and efficient way to reverse
+    strings in Python.
+    
+    Args:
+        input: A string to be reversed
+    
+    Returns:
+        The input string reversed
+    """
+    return input[::-1]
+
 def main():
     """Main function to start the application."""
     print("🤖 Python LangChain Agent Starting...")
@@ -71,7 +87,7 @@ def main():
         api_key=github_token
     )
     
-    # Create tools list with Calculator and Time tools
+    # Create tools list with Calculator, Time, and String Reversal tools
     tools = [
         Tool(
             name="Calculator",
@@ -87,6 +103,11 @@ def main():
             description="Returns the current date and time. Use this tool when the user asks what time it is, "
                        "what the current date is, or any question about the present moment. "
                        "The input parameter is not used but is required by the tool interface."
+        ),
+        Tool(
+            name="reverse_string",
+            func=reverse_string,
+            description="Reverses a string. Input should be a single string."
         )
     ]
     
@@ -104,36 +125,46 @@ def main():
     # Create the agent chain
     agent_chain = prompt | llm_with_tools
     
-    # Test the agent with a query
-    test_query = "What time is it right now?"
+    # Create a list of test queries
+    test_queries = [
+        "What time is it right now?",
+        "What is 25 * 4 + 10?",
+        "Reverse the string 'Hello World'"
+    ]
     
-    try:
-        print(f"📝 Query: {test_query}\n")
-        
-        # Invoke the agent
-        response = agent_chain.invoke({"input": test_query})
-        
-        # Check if the response contains tool calls
-        if hasattr(response, 'tool_calls') and response.tool_calls:
-            print(f"Agent is calling tools...")
-            for tool_call in response.tool_calls:
-                tool_name = tool_call.get("name")
-                tool_input = tool_call.get("args", {})
-                print(f"  📌 Tool: {tool_name}")
-                print(f"  📌 Input: {tool_input}")
-                
-                # Execute the tool
-                if tool_name == "Calculator":
-                    result = calculator(tool_input.get("expression", ""))
-                    print(f"  📌 Result: {result}")
-        else:
-            print(f"Response content: {response.content if hasattr(response, 'content') else response}")
-        
-        print(f"\n✅ Agent completed successfully\n")
-    except Exception as e:
-        print(f"❌ Error: {str(e)}\n")
-        import traceback
-        traceback.print_exc()
+    # Run multiple test queries
+    print("Running example queries:\n")
+    
+    for query in test_queries:
+        try:
+            print(f"📝 Query: {query}")
+            print("─" * 50)
+            
+            # Invoke the agent
+            response = agent_chain.invoke({"input": query})
+            
+            # Check if the response contains tool calls
+            if hasattr(response, 'tool_calls') and response.tool_calls:
+                print(f"Agent is calling tools...")
+                for tool_call in response.tool_calls:
+                    tool_name = tool_call.get("name")
+                    tool_input = tool_call.get("args", {})
+                    print(f"  📌 Tool: {tool_name}")
+                    print(f"  📌 Input: {tool_input}")
+                    
+                    # Execute the tool
+                    if tool_name == "Calculator":
+                        result = calculator(tool_input.get("expression", ""))
+                        print(f"  📌 Result: {result}")
+            else:
+                response_text = response.content if hasattr(response, 'content') else response
+                print(f"✅ Result: {response_text}")
+            
+            print()
+        except Exception as e:
+            print(f"❌ Error: {str(e)}\n")
+            import traceback
+            traceback.print_exc()
 
 if __name__ == "__main__":
     main()

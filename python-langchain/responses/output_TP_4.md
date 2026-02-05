@@ -4,10 +4,10 @@ C:\Users\mikdo\CodeYou\ai-agent-lab\venv\Lib\site-packages\langchain_core\_api\d
 🤖 Python LangChain Agent Starting...
 ✅ GitHub token loaded successfully!
 
-📝 Query: What time is it right now?
+📝 Query: Reverse the string 'Hello World'
 
 Agent is calling tools...
-  📌 Tool: get_current_time
-  📌 Input: {'__arg1': ''}
+  📌 Tool: reverse_string
+  📌 Input: {'__arg1': 'Hello World'}
 
 ✅ Agent completed successfully
