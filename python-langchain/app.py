@@ -116,9 +116,10 @@ def main():
     
     # Create a prompt template for the agent
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are a helpful AI assistant. You have access to a Calculator tool. "
-                   "When you need to perform calculations, use the Calculator tool by calling it with the mathematical expression. "
-                   "Always use the tool for math questions rather than trying to calculate yourself."),
+        ("system", "You are a professional and succinct AI assistant. Provide clear, concise responses without unnecessary elaboration. "
+                   "You have access to three tools: Calculator (for math), get_current_time (for date/time), and reverse_string (for string operations). "
+                   "Use the appropriate tool when needed to answer questions accurately. "
+                   "Be professional in tone and efficient in your responses."),
         ("human", "{input}")
     ])
     
@@ -152,19 +153,30 @@ def main():
                     print(f"  📌 Tool: {tool_name}")
                     print(f"  📌 Input: {tool_input}")
                     
-                    # Execute the tool
+                    # Execute the tool by getting the first (and usually only) argument
+                    # LangChain passes single arguments as __arg1
+                    first_arg = tool_input.get("__arg1", "") or tool_input.get("input", "") or tool_input.get("expression", "")
+                    
                     if tool_name == "Calculator":
-                        result = calculator(tool_input.get("expression", ""))
+                        result = calculator(first_arg)
+                        print(f"  📌 Result: {result}")
+                    elif tool_name == "get_current_time":
+                        result = get_current_time(first_arg)
+                        print(f"  📌 Result: {result}")
+                    elif tool_name == "reverse_string":
+                        result = reverse_string(first_arg)
                         print(f"  📌 Result: {result}")
             else:
                 response_text = response.content if hasattr(response, 'content') else response
                 print(f"✅ Result: {response_text}")
             
-            print()
+            print("\n")
         except Exception as e:
             print(f"❌ Error: {str(e)}\n")
             import traceback
             traceback.print_exc()
+    
+    print("🎉 Agent demo complete!")
 
 if __name__ == "__main__":
     main()
