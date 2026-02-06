@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("dotnet-semantickernel")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8bdb74701945942a5e903ea0f2ec1c20a089c76e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0b77692ebb91de17271054f8da54cb6efe851b3b")]
 [assembly: System.Reflection.AssemblyProductAttribute("dotnet-semantickernel")]
 [assembly: System.Reflection.AssemblyTitleAttribute("dotnet-semantickernel")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
