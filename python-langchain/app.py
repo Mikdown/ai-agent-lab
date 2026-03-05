@@ -1,3 +1,12 @@
+import os
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
+from langchain_core.messages import HumanMessage
+from langchain.agents import create_agent
+from langchain_core.tools import Tool
+from datetime import datetime
+
 def calculator(expression: str) -> str:
     """
     Evaluates a mathematical expression from a string input.
@@ -10,25 +19,30 @@ def calculator(expression: str) -> str:
         return str(result)
     except Exception as e:
         return f"Error: {e}"
-import os
-from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
-from pydantic import SecretStr
-from langchain_core.messages import HumanMessage
-from langchain.agents import create_agent
-from langchain_core.tools import Tool
-from datetime import datetime
+    
+def get_current_time(_: str) -> str:
+    """
+    Returns the current date and time as a formatted string (YYYY-MM-DD HH:MM:SS).
+    The input parameter is required by the Tool interface but is not used.
+    """
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+def reverse_string(s: str) -> str:
+    """
+    Reverses the input string and returns the result.
+    """
+    return s[::-1]
+    
 def main():
     load_dotenv()
     print("🚀 Starting LangChain AI Agent Application!")
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    if not openai_api_key:
-        print("❌ ERROR: OPENAI_API_KEY not found in environment variables.")
+    github_token = os.getenv("GITHUB_TOKEN")
+    if not github_token:
+        print("❌ ERROR: GITHUB_TOKEN not found in environment variables.")
         print("\n🔑 Please create a GitHub personal access token and add it to your environment.")
         print("   1. Create a token at: https://github.com/settings/tokens\n   2. Add it to a .env file as: OPENAI_API_KEY=your_token_here\n   3. Restart the application.\n")
         return
-    print("✅ OPENAI_API_KEY found! Continuing... 🟢")
+    print("✅ GITHUB_TOKEN found! Continuing... 🟢")
 
     # Create ChatOpenAI instance for GitHub's openai/gpt-4o endpoint
     chat = ChatOpenAI(
@@ -50,6 +64,22 @@ def main():
                 "Use it whenever you need to compute, evaluate, or check the result of a math problem, especially if the calculation is non-trivial or involves multiple steps. "
                 "Do not use for non-mathematical queries."
             )
+        ),
+        Tool(
+            name="get_current_time",
+            func=get_current_time,
+            description=(
+                "Use this tool to get the current date and time. "
+                "Call it whenever you need to know the present time or date, or answer questions about the current timestamp."
+            )
+        ),
+        Tool(
+            name="reverse_string",
+            func=reverse_string,
+            description=(
+                "Use this tool to reverse a string. "
+                "Call it whenever you need to reverse a string."
+            )
         )
     ]
 
@@ -60,7 +90,7 @@ def main():
             tools,
             debug=True
         )
-        query = "What is 25 * 4 + 10?"
+        query = "What time is it right now?"
         print(f"🤖 Agent running query: {query}")
         result = agent_executor.invoke({"messages": [{"role": "user", "content": query}]})
         print("🟢 Agent Output:")
