@@ -90,7 +90,7 @@ def main():
             tools,
             debug=True
         )
-        query = "What time is it right now?"
+        query = "Reverse the string 'Hello World!'"
         print(f"🤖 Agent running query: {query}")
         result = agent_executor.invoke({"messages": [{"role": "user", "content": query}]})
         print("🟢 Agent Output:")
